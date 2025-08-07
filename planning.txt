@@ -1,0 +1,32 @@
+The first module of project will focus on:
+1. Employees can complain about some problem to their respective department's admin
+2. Employees can camplain anonymously
+3. Admin can read his/her department's problem
+4. Executives can see all complains
+
+There will be little little steps to have a final goal of making an internal slack for a company
+
+Some future suggestions will include:
+1. Chat with every Employees
+2. Group chat of departments
+3. Status of complains
+and more....
+
+
+
+Website flow:
+0. Employees, Admins signup will hve department input field
+1. Employees, Admins and executives signin/signup
+2. Employees will see the buttton create a complain request
+3. There will be option to show the employee name or anonymous complain
+4. Complain will get forward to the assigned admin for that employee's department
+5. Admins can see their department's complain from Employees
+6. Executives can see all complains with admins' replies too
+
+
+
+Tech Stack:
+1. Reactjs
+2. Nodejs + Express
+3. Supabase (Postgres SQL)
+4. React Native in future app
