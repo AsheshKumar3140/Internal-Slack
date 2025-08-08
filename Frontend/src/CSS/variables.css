@@ -1,0 +1,88 @@
+/* Dark Mode Color Variables */
+
+:root {
+  /* Background Colors */
+  --bg-primary: #0f0f0f;
+  --bg-secondary: rgba(30, 30, 30, 0.8);
+  --bg-tertiary: rgba(20, 20, 20, 0.8);
+  --bg-quaternary: rgba(40, 40, 40, 0.9);
+  
+  /* Card and Container Colors */
+  --card-bg: rgba(30, 30, 30, 0.8);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  
+  /* Input Field Colors */
+  --input-bg: rgba(20, 20, 20, 0.8);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-focus-bg: rgba(40, 40, 40, 0.9);
+  --input-focus-border: rgba(255, 255, 255, 0.3);
+  --input-focus-shadow: rgba(255, 255, 255, 0.05);
+  --input-placeholder: rgba(255, 255, 255, 0.6);
+  
+  /* Button Colors */
+  --btn-primary-bg: rgba(60, 60, 60, 0.8);
+  --btn-primary-border: rgba(255, 255, 255, 0.1);
+  --btn-primary-hover-bg: rgba(80, 80, 80, 0.9);
+  --btn-primary-hover-border: rgba(255, 255, 255, 0.2);
+  --btn-disabled-opacity: 0.6;
+  
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.9);
+  --text-tertiary: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.6);
+  
+  /* Status Colors */
+  --error-bg: rgba(220, 53, 69, 0.1);
+  --error-border: rgba(220, 53, 69, 0.2);
+  --error-text: #ff6b6b;
+  
+  --success-bg: rgba(40, 167, 69, 0.1);
+  --success-border: rgba(40, 167, 69, 0.2);
+  --success-text: #51cf66;
+  
+  --warning-bg: rgba(255, 193, 7, 0.1);
+  --warning-border: rgba(255, 193, 7, 0.2);
+  --warning-text: #ffd43b;
+  
+  --info-bg: rgba(13, 202, 240, 0.1);
+  --info-border: rgba(13, 202, 240, 0.2);
+  --info-text: #74c0fc;
+  
+  /* Link Colors */
+  --link-color: #ffffff;
+  --link-hover-color: rgba(255, 255, 255, 0.8);
+  
+  /* Border Radius */
+  --border-radius-sm: 8px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 20px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 30px;
+  --spacing-xxl: 40px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Z-index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
