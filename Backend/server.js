@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import { connectToDatabase } from "./config/supabase.js";
 import authRoutes from "./routes/authRoutes.js";
 
@@ -7,6 +8,14 @@ dotenv.config({ path: "../.env" });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// CORS middleware
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 

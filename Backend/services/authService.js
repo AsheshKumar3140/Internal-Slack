@@ -1,173 +1,196 @@
 import { supabase } from '../config/supabase.js';
-import { createRolesTable } from '../models/roles.js';
-import { createUsersTable } from '../models/users.js';
+import { createUsers } from '../models/users.js';
+import { createRoles, getOrCreateRole } from '../models/roles.js';
 
-export class AuthService {
-  // Ensure tables exist before operations
-  static async ensureTablesExist() {
+export async function ensureTablesExist() {
     try {
-      console.log('🔄 Ensuring database tables exist...');
-      
-      // Create roles table first (since users table references it)
-      await createRolesTable();
-      
-      // Create users table
-      await createUsersTable();
-      
-      console.log('✅ Database tables are ready');
+        // Create roles table FIRST (since users table references it)
+        await createRoles();
+        
+        // Then create users table
+        await createUsers();
     } catch (error) {
-      console.error('❌ Failed to create tables:', error.message);
-      throw error;
+        throw error;
     }
-  }
+}
 
-  // Sign up a new user
-  static async signUp(userData) {
-    const { email, password, name, role_id } = userData;
+export async function signUp(email, password, name, roleName, departmentName) {
+    let authUserId = null;
     
     try {
-      // 1. Ensure tables exist before creating user
-      await this.ensureTablesExist();
-      
-      // 2. Create user in Supabase Auth (auth.users table)
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true, // Auto-confirm email for development
-        user_metadata: {
-          name: name
+        await ensureTablesExist();
+
+        // Create user in auth.users
+        const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true
+        });
+
+        if (authError) {
+            // Handle specific error cases
+            if (authError.message.includes('already been registered')) {
+                throw new Error('A user with this email address has already been registered');
+            }
+            
+            throw authError;
         }
-      });
 
-      if (authError) {
-        console.error('Auth signup error:', authError);
-        throw new Error(authError.message);
-      }
+        authUserId = authUser.user.id;
 
-      // 3. Create user in custom users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .insert({
-          auth_user_id: authData.user.id,
-          email: email,
-          name: name,
-          role_id: role_id || null,
-          is_active: true
-        })
-        .select()
-        .single();
+        // Get or create the role
+        const roleId = await getOrCreateRole(roleName, departmentName);
 
-      if (userError) {
-        console.error('User table insert error:', userError);
-        // If user table insert fails, we should clean up the auth user
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw new Error(userError.message);
-      }
+        // Create user in public.users
+        const { data: user, error: userError } = await supabase
+            .from('users')
+            .insert({
+                auth_user_id: authUserId,
+                email,
+                name,
+                role_id: roleId,
+                is_active: true
+            })
+            .select()
+            .single();
 
-      console.log('✅ User created successfully:', userData.email);
-      
-      return {
-        success: true,
-        user: {
-          id: userData.id,
-          auth_user_id: authData.user.id,
-          email: userData.email,
-          name: userData.name,
-          role_id: userData.role_id,
-          is_active: userData.is_active,
-          created_at: userData.created_at
+        if (userError) {
+            // Clean up: delete the auth user if public.users insert failed
+            if (authUserId) {
+                await supabase.auth.admin.deleteUser(authUserId);
+            }
+            
+            throw userError;
         }
-      };
 
-    } catch (error) {
-      console.error('Signup failed:', error.message);
-      throw error;
-    }
-  }
+        // Automatically sign in the user after successful signup
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
 
-  // Sign in user
-  static async signIn(email, password) {
-    try {
-      // Ensure tables exist before signin
-      await this.ensureTablesExist();
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      // Get user data from custom users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_user_id', data.user.id)
-        .single();
-
-      if (userError) {
-        throw new Error('User data not found');
-      }
-
-      return {
-        success: true,
-        user: {
-          ...userData,
-          session: data.session
+        if (signInError) {
+            throw signInError;
         }
-      };
 
+        // Get user details with role information
+        const { data: userDetails, error: userDetailsError } = await supabase
+            .from('users')
+            .select(`
+                *,
+                roles:role_id (
+                    role_name,
+                    department_name
+                )
+            `)
+            .eq('auth_user_id', authUserId)
+            .single();
+
+        if (userDetailsError) {
+            throw userDetailsError;
+        }
+
+        return { 
+            user: userDetails, 
+            authUser,
+            access_token: signInData.session.access_token
+        };
     } catch (error) {
-      console.error('Signin failed:', error.message);
-      throw error;
+        // Clean up: delete the auth user if something went wrong
+        if (authUserId) {
+            try {
+                await supabase.auth.admin.deleteUser(authUserId);
+            } catch (cleanupError) {
+                // Ignore cleanup errors
+            }
+        }
+        
+        throw error;
     }
-  }
+}
 
-  // Sign out user
-  static async signOut() {
+export async function signIn(email, password) {
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw new Error(error.message);
-      }
+        await ensureTablesExist();
 
-      return { success: true };
+        // Use the standard signInWithPassword method
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            throw error;
+        }
+
+        // Get user details from public.users
+        const { data: userDetails, error: userError } = await supabase
+            .from('users')
+            .select(`
+                *,
+                roles:role_id (
+                    role_name,
+                    department_name
+                )
+            `)
+            .eq('auth_user_id', data.user.id)
+            .single();
+
+        if (userError) {
+            throw userError;
+        }
+
+        return {
+            user: userDetails,
+            access_token: data.session.access_token
+        };
     } catch (error) {
-      console.error('Signout failed:', error.message);
-      throw error;
+        throw error;
     }
-  }
+}
 
-  // Get current user
-  static async getCurrentUser() {
+export async function signOut(accessToken) {
     try {
-      // Ensure tables exist before getting user
-      await this.ensureTablesExist();
-      
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
-        return null;
-      }
-
-      // Get user data from custom users table
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('auth_user_id', user.id)
-        .single();
-
-      if (userError) {
-        return null;
-      }
-
-      return userData;
+        const { error } = await supabase.auth.admin.signOut(accessToken);
+        if (error) {
+            throw error;
+        }
+        return { success: true };
     } catch (error) {
-      console.error('Get current user failed:', error.message);
-      return null;
+        throw error;
     }
-  }
+}
+
+export async function getCurrentUser(accessToken) {
+    try {
+        const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+        if (error) {
+            throw error;
+        }
+
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        // Get user details from public.users
+        const { data: userDetails, error: userError } = await supabase
+            .from('users')
+            .select(`
+                *,
+                roles:role_id (
+                    role_name,
+                    department_name
+                )
+            `)
+            .eq('auth_user_id', user.id)
+            .single();
+
+        if (userError) {
+            throw userError;
+        }
+
+        return userDetails;
+    } catch (error) {
+        throw error;
+    }
 }
