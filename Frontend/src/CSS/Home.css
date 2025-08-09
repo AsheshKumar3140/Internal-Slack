@@ -354,3 +354,13 @@
 .loading-row {
   color: var(--text-tertiary);
 }
+
+.you-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: var(--border-radius-sm);
+  background: var(--info-bg);
+  color: var(--info-text);
+  border: 1px solid var(--info-border);
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../CSS/Home.css';
 
@@ -7,9 +7,21 @@ const Team = () => {
   const [error, setError] = useState('');
   const [department, setDepartment] = useState('');
   const [members, setMembers] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Read current user id from localStorage
+    try {
+      const raw = localStorage.getItem('user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u?.id) setCurrentUserId(u.id);
+      }
+    } catch (_) {
+      // ignore parse errors
+    }
+
     const fetchTeam = async () => {
       try {
         setLoading(true);
@@ -34,6 +46,21 @@ const Team = () => {
     fetchTeam();
   }, []);
 
+  const sortedMembers = useMemo(() => {
+    const copy = [...members];
+    copy.sort((a, b) => {
+      const aIsMe = a.id === currentUserId ? 1 : 0;
+      const bIsMe = b.id === currentUserId ? 1 : 0;
+      if (aIsMe !== bIsMe) return bIsMe - aIsMe; // put "me" first
+      const an = (a.name || '').toLowerCase();
+      const bn = (b.name || '').toLowerCase();
+      if (an < bn) return -1;
+      if (an > bn) return 1;
+      return 0;
+    });
+    return copy;
+  }, [members, currentUserId]);
+
   return (
     <div className="home-container">
       <div className="home-card">
@@ -53,12 +80,15 @@ const Team = () => {
           {error && <div className="error-message" style={{ marginTop: 0 }}>{error}</div>}
           {!loading && !error && (
             <ul className="team-list">
-              {members.length === 0 && <li className="team-empty">No members found.</li>}
-              {members.map((m) => (
+              {sortedMembers.length === 0 && <li className="team-empty">No members found.</li>}
+              {sortedMembers.map((m) => (
                 <li key={m.id} className="team-item">
                   <div className="avatar-circle">{(m.name || 'U').slice(0,1).toUpperCase()}</div>
                   <div className="team-meta">
-                    <div className="team-name">{m.name || 'Unnamed'}</div>
+                    <div className="team-name">
+                      {m.name || 'Unnamed'}
+                      {currentUserId === m.id && <span className="you-badge">You</span>}
+                    </div>
                     <div className="team-role">{m.roles?.role_name || 'Role'}</div>
                   </div>
                 </li>
