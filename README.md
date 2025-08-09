@@ -1,6 +1,6 @@
 # Internal Slack - Authentication System
 
-A modern authentication system built with Node.js, Express, React, and Supabase. Features department-based role management with automatic table creation and seamless user experience.
+A modern authentication system built with Node.js, Express, React, and Supabase. Features department-based role management with automatic table creation, seamless user experience, and proper frontend routing.
 
 ## 🚀 Features
 
@@ -10,6 +10,9 @@ A modern authentication system built with Node.js, Express, React, and Supabase.
 - **Modern UI**: Dark glass-morphism design
 - **Role Management**: Dynamic role creation based on department
 - **Token-based Authentication**: JWT tokens for secure API access
+- **Frontend Routing**: React Router with protected routes
+- **Dashboard Interface**: User dashboard with role and department info
+- **Responsive Design**: Works on all device sizes
 
 ## 📋 Prerequisites
 
@@ -128,14 +131,17 @@ Internal Slack/
 │   │   ├── components/
 │   │   │   ├── Auth.jsx         # Main auth container
 │   │   │   ├── SignUp.jsx       # Signup form with department/role
-│   │   │   └── SignIn.jsx       # Signin form
+│   │   │   ├── SignIn.jsx       # Signin form
+│   │   │   └── Home.jsx         # Dashboard component
 │   │   ├── CSS/
 │   │   │   ├── Auth.css         # Dark glass-morphism styling
+│   │   │   ├── Home.css         # Dashboard styling
 │   │   │   └── variables.css    # CSS variables for theming
 │   │   ├── config/
 │   │   │   └── supabase.js      # Frontend Supabase client
-│   │   ├── App.jsx              # Main React component
-│   │   └── main.jsx             # React entry point
+│   │   ├── App.jsx              # Main React component with routing
+│   │   ├── App.css              # App-level styling
+│   │   └── main.jsx             # React entry point with Router
 │   └── package.json
 └── README.md
 ```
@@ -144,7 +150,7 @@ Internal Slack/
 
 ### 1. Signup Process
 ```
-User Input → Validation → Create Auth User → Create Role → Create Public User → Auto Signin → Return Token
+User Input → Validation → Create Auth User → Create Role → Create Public User → Auto Signin → Redirect to /home
 ```
 
 **Steps:**
@@ -155,11 +161,11 @@ User Input → Validation → Create Auth User → Create Role → Create Public
 5. Creates user in `public.users` table
 6. Automatically signs in the user
 7. Returns access token and user data
-8. Frontend stores token in localStorage
+8. Frontend stores token and redirects to `/home`
 
 ### 2. Signin Process
 ```
-User Input → Validation → Signin → Get User Details → Return Token
+User Input → Validation → Signin → Get User Details → Redirect to /home
 ```
 
 **Steps:**
@@ -168,7 +174,14 @@ User Input → Validation → Signin → Get User Details → Return Token
 3. Signs in user via Supabase Auth
 4. Retrieves user details from `public.users`
 5. Returns access token and user data
-6. Frontend stores token in localStorage
+6. Frontend stores token and redirects to `/home`
+
+### 3. Routing Flow
+```
+/ → Auth Component (if not authenticated)
+/home → Dashboard Component (if authenticated)
+* → Redirect to / (for unknown routes)
+```
 
 ## 🗄️ Database Schema
 
@@ -230,6 +243,7 @@ CREATE TABLE public.users (
 - **Form Validation**: Client-side and server-side validation
 - **Error Handling**: User-friendly error messages
 - **Loading States**: Visual feedback during operations
+- **Dashboard Interface**: User info, quick actions, recent activity
 
 ## 🔒 Security Features
 
@@ -239,6 +253,7 @@ CREATE TABLE public.users (
 - **Role-based Access**: Department-specific roles
 - **Automatic Cleanup**: Failed signups are cleaned up
 - **CORS Protection**: Cross-origin request handling
+- **Protected Routes**: Frontend route protection
 
 ## 🚀 Key Features
 
@@ -251,11 +266,24 @@ CREATE TABLE public.users (
 - Auto-signin after successful signup
 - No need to sign in separately after registration
 - Token is immediately available for API calls
+- Smooth navigation between auth and dashboard
 
 ### Department-based Role Management
 - Roles are created automatically when needed
 - Department-specific role lists
 - Dynamic role creation during signup
+
+### Frontend Routing
+- React Router with BrowserRouter
+- Protected routes (`/home` requires authentication)
+- Automatic redirects based on auth state
+- Clean URLs with proper frontend routing
+
+### Dashboard Features
+- **User Information Display**: Email, department, role, status
+- **Quick Actions Grid**: Chat, team, files, settings
+- **Recent Activity**: Sign-in and account creation history
+- **Sign Out Functionality**: Proper token cleanup and redirect
 
 ## 🐛 Troubleshooting
 
@@ -279,6 +307,11 @@ CREATE TABLE public.users (
    - Verify `.env` files are in correct locations
    - Check for spaces around `=` in `.env` files
 
+6. **Routing Issues**
+   - Ensure React Router is properly installed
+   - Check that all route components are imported correctly
+   - Verify authentication state is being managed properly
+
 ### Database Issues
 - **Tables not created**: Check if `exec_sql` function exists
 - **Foreign key errors**: Ensure roles table is created before users table
@@ -290,18 +323,39 @@ CREATE TABLE public.users (
 2. **Start Frontend**: `cd Frontend && npm run dev`
 3. **Test Signup**: Create new account with department/role
 4. **Test Signin**: Sign in with existing account
-5. **Check Database**: Verify data in Supabase dashboard
+5. **Test Routing**: Navigate between `/` and `/home`
+6. **Test Dashboard**: Check user info and sign out functionality
+7. **Check Database**: Verify data in Supabase dashboard
+
+## 📱 User Journey
+
+### New User Flow
+1. **Visit `/`** → See signup form
+2. **Fill form** → Name, email, password, department, role
+3. **Submit** → Account created and auto-signed in
+4. **Redirected to `/home`** → See dashboard with user info
+5. **Explore dashboard** → Quick actions, recent activity
+6. **Sign out** → Redirected back to `/`
+
+### Existing User Flow
+1. **Visit `/`** → See signin form
+2. **Enter credentials** → Email and password
+3. **Submit** → Validated and signed in
+4. **Redirected to `/home`** → See dashboard
+5. **Use dashboard** → Access features and information
 
 ## 📝 Future Enhancements
 
-- [ ] Dashboard interface
+- [ ] Real-time messaging system
+- [ ] File upload and sharing
 - [ ] User profile management
-- [ ] Role-based permissions
-- [ ] Real-time messaging
-- [ ] File upload functionality
-- [ ] Admin panel
+- [ ] Advanced role-based permissions
+- [ ] Admin panel for user management
 - [ ] Password reset functionality
 - [ ] Email verification
+- [ ] Team collaboration features
+- [ ] Activity logging and analytics
+- [ ] Mobile app development
 
 ## 🤝 Contributing
 
@@ -322,7 +376,8 @@ For issues and questions:
 2. Review the Supabase documentation
 3. Check the console for error messages
 4. Verify environment variables are set correctly
+5. Ensure all dependencies are installed
 
 ---
 
-**Built with ❤️ using Node.js, Express, React, and Supabase**
+**Built with ❤️ using Node.js, Express, React, React Router, and Supabase**
