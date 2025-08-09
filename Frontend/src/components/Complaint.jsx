@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../CSS/Auth.css';
 
 const departments = [
@@ -16,6 +17,7 @@ const MAX_FILES = 5;
 const MAX_FILE_SIZE_MB = 10; // 10 MB per file
 
 const Complaint = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     department: '',
     category: '',
@@ -149,8 +151,16 @@ const Complaint = () => {
   return (
     <div className="auth-container">
       <div className="glass-card">
-        <h2>Make a Complaint</h2>
-        <p className="subtitle">Let us know what went wrong</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2>Make a Complaint</h2>
+            <p className="subtitle">Let us know what went wrong</p>
+          </div>
+          <button type="button" className="action-btn" onClick={() => navigate('/home')}>
+            <span className="icon">←</span>
+            <span>Back</span>
+          </button>
+        </div>
 
         {message && (
           <div className={isSuccess ? 'success-message' : 'error-message'} style={{ marginTop: 0 }}>{message}</div>
