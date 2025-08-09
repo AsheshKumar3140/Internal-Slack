@@ -91,10 +91,10 @@ router.post('/signin', async (req, res) => {
 });
 
 // Sign out
-router.post('/signout', authenticateToken, async (req, res) => {
+router.post('/signout', async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        await signOut(token);
+        // For client-side tokens, we just return success
+        // The client will clear the token from localStorage
         res.json({ message: 'Signed out successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
