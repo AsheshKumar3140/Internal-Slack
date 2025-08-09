@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SignUp from './SignUp';
 import SignIn from './SignIn';
 
-const Auth = () => {
+const Auth = ({ onAuthSuccess }) => {
     const [isSignUp, setIsSignUp] = useState(true);
 
     const switchToSignIn = () => setIsSignUp(false);
@@ -11,9 +11,9 @@ const Auth = () => {
     return (
         <div>
             {isSignUp ? (
-                <SignUp onSwitchToSignIn={switchToSignIn} />
+                <SignUp onSwitchToSignIn={switchToSignIn} onAuthSuccess={onAuthSuccess} />
             ) : (
-                <SignIn onSwitchToSignUp={switchToSignUp} />
+                <SignIn onSwitchToSignUp={switchToSignUp} onAuthSuccess={onAuthSuccess} />
             )}
         </div>
     );

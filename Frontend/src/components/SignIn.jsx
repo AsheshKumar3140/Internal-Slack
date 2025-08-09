@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../CSS/Auth.css';
 
-const SignIn = ({ onSwitchToSignUp }) => {
+const SignIn = ({ onSwitchToSignUp, onAuthSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -79,7 +79,8 @@ const SignIn = ({ onSwitchToSignUp }) => {
             });
 
             alert('Signed in successfully!');
-            // You can redirect to dashboard here
+            // Call onAuthSuccess to redirect to home page
+            onAuthSuccess();
         } catch (error) {
             console.error('Signin error:', error);
             setErrors({ submit: error.message });
