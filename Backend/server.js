@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectToDatabase } from "./config/supabase.js";
 import authRoutes from "./routes/authRoutes.js";
+import complaintRoutes from "./routes/complaintRoutes.js";
+import teamRoutes from "./routes/teamRoutes.js";
 
 dotenv.config({ path: "../.env" });
 
@@ -21,6 +23,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/complaints', complaintRoutes);
+app.use('/api/team', teamRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World");

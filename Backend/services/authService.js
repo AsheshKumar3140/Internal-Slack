@@ -1,14 +1,15 @@
-import { supabase } from '../config/supabase.js';
+import { supabase, createUserClient } from '../config/supabase.js';
 import { createUsers } from '../models/users.js';
 import { createRoles, getOrCreateRole } from '../models/roles.js';
+import { createComplaints } from '../models/complaints.js';
+import { createSecurityPolicies } from '../models/security.js';
 
 export async function ensureTablesExist() {
     try {
-        // Create roles table FIRST (since users table references it)
         await createRoles();
-        
-        // Then create users table
         await createUsers();
+        await createComplaints();
+        await createSecurityPolicies();
     } catch (error) {
         throw error;
     }
@@ -20,7 +21,7 @@ export async function signUp(email, password, name, roleName, departmentName) {
     try {
         await ensureTablesExist();
 
-        // Create user in auth.users
+        // Create user in auth.users via admin client
         const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
             email,
             password,
@@ -28,11 +29,9 @@ export async function signUp(email, password, name, roleName, departmentName) {
         });
 
         if (authError) {
-            // Handle specific error cases
             if (authError.message.includes('already been registered')) {
                 throw new Error('A user with this email address has already been registered');
             }
-            
             throw authError;
         }
 
@@ -41,7 +40,7 @@ export async function signUp(email, password, name, roleName, departmentName) {
         // Get or create the role
         const roleId = await getOrCreateRole(roleName, departmentName);
 
-        // Create user in public.users
+        // Create user in public.users using admin client (bypasses RLS)
         const { data: user, error: userError } = await supabase
             .from('users')
             .insert({
@@ -55,25 +54,24 @@ export async function signUp(email, password, name, roleName, departmentName) {
             .single();
 
         if (userError) {
-            // Clean up: delete the auth user if public.users insert failed
             if (authUserId) {
                 await supabase.auth.admin.deleteUser(authUserId);
             }
-            
             throw userError;
         }
 
-        // Automatically sign in the user after successful signup
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        // Sign in using a short-lived anon client so we don't mutate the admin client
+        const userClient = createUserClient();
+        const { data: signInData, error: signInError } = await userClient.auth.signInWithPassword({
             email,
             password
         });
-
+        
         if (signInError) {
             throw signInError;
         }
 
-        // Get user details with role information
+        // Get user details with role information (using admin client or user client; admin is fine for now)
         const { data: userDetails, error: userDetailsError } = await supabase
             .from('users')
             .select(`
@@ -90,21 +88,17 @@ export async function signUp(email, password, name, roleName, departmentName) {
             throw userDetailsError;
         }
 
+        const userWithMeta = { ...userDetails, last_sign_in_at: signInData.user?.last_sign_in_at || null };
+
         return { 
-            user: userDetails, 
+            user: userWithMeta, 
             authUser,
             access_token: signInData.session.access_token
         };
     } catch (error) {
-        // Clean up: delete the auth user if something went wrong
         if (authUserId) {
-            try {
-                await supabase.auth.admin.deleteUser(authUserId);
-            } catch (cleanupError) {
-                // Ignore cleanup errors
-            }
+            try { await supabase.auth.admin.deleteUser(authUserId); } catch {}
         }
-        
         throw error;
     }
 }
@@ -113,8 +107,9 @@ export async function signIn(email, password) {
     try {
         await ensureTablesExist();
 
-        // Use the standard signInWithPassword method
-        const { data, error } = await supabase.auth.signInWithPassword({
+        // Use anon client for sign-in (does not mutate admin client)
+        const userClient = createUserClient();
+        const { data, error } = await userClient.auth.signInWithPassword({
             email,
             password
         });
@@ -123,7 +118,6 @@ export async function signIn(email, password) {
             throw error;
         }
 
-        // Get user details from public.users
         const { data: userDetails, error: userError } = await supabase
             .from('users')
             .select(`
@@ -140,8 +134,10 @@ export async function signIn(email, password) {
             throw userError;
         }
 
+        const userWithMeta = { ...userDetails, last_sign_in_at: data.user?.last_sign_in_at || null };
+
         return {
-            user: userDetails,
+            user: userWithMeta,
             access_token: data.session.access_token
         };
     } catch (error) {
@@ -151,12 +147,6 @@ export async function signIn(email, password) {
 
 export async function signOut(accessToken) {
     try {
-        // For client-side tokens, we can't directly sign out via admin API
-        // Instead, we'll just return success and let the client clear the token
-        // The token will expire naturally or can be invalidated on the client side
-        
-        // Optionally, we could invalidate the token in our database
-        // For now, we'll just return success
         return { success: true };
     } catch (error) {
         throw error;
@@ -165,16 +155,15 @@ export async function signOut(accessToken) {
 
 export async function getCurrentUser(accessToken) {
     try {
-        const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+        const userClient = createUserClient(accessToken);
+        const { data: { user }, error } = await userClient.auth.getUser();
         if (error) {
             throw error;
         }
-
         if (!user) {
             throw new Error("User not found");
         }
 
-        // Get user details from public.users
         const { data: userDetails, error: userError } = await supabase
             .from('users')
             .select(`
@@ -191,7 +180,7 @@ export async function getCurrentUser(accessToken) {
             throw userError;
         }
 
-        return userDetails;
+        return { ...userDetails, last_sign_in_at: user?.last_sign_in_at || null };
     } catch (error) {
         throw error;
     }
