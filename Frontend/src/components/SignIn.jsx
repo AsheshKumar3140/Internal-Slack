@@ -8,6 +8,7 @@ const SignIn = ({ onSwitchToSignUp, onAuthSuccess }) => {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -15,47 +16,35 @@ const SignIn = ({ onSwitchToSignUp, onAuthSuccess }) => {
             ...prev,
             [name]: value
         }));
-        
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
                 [name]: ''
             }));
         }
+        setSuccessMsg('');
     };
 
     const validateForm = () => {
         const newErrors = {};
-
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        }
-
+        if (!formData.email.trim()) newErrors.email = 'Email is required';
+        if (!formData.password) newErrors.password = 'Password is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return;
 
         setIsLoading(true);
         setErrors({});
+        setSuccessMsg('');
 
         try {
             const response = await fetch('http://localhost:3000/api/auth/signin', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: formData.email,
                     password: formData.password
@@ -63,26 +52,19 @@ const SignIn = ({ onSwitchToSignUp, onAuthSuccess }) => {
             });
 
             const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Signin failed');
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Signin failed');
-            }
-
-            // Store user data and token
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('access_token', data.access_token);
 
-            // Clear form
-            setFormData({
-                email: '',
-                password: ''
-            });
+            setFormData({ email: '', password: '' });
+            setSuccessMsg('Signed in successfully!');
 
-            alert('Signed in successfully!');
-            // Call onAuthSuccess to redirect to home page
-            onAuthSuccess();
+            // Wait briefly so the success message is visible, then navigate
+            setTimeout(() => {
+                onAuthSuccess();
+            }, 1000);
         } catch (error) {
-            console.error('Signin error:', error);
             setErrors({ submit: error.message });
         } finally {
             setIsLoading(false);
@@ -96,6 +78,7 @@ const SignIn = ({ onSwitchToSignUp, onAuthSuccess }) => {
                 <p className="subtitle">Sign in to your account</p>
 
                 {errors.submit && <div className="error-message">{errors.submit}</div>}
+                {successMsg && <div className="success-message">{successMsg}</div>}
 
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">

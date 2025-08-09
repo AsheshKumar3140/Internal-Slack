@@ -1,9 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../CSS/Home.css';
 
 const Home = ({ onSignOut }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const formatTimestamp = (isoString) => {
+        if (!isoString) return 'N/A';
+        try {
+            const date = new Date(isoString);
+            if (Number.isNaN(date.getTime())) return 'N/A';
+            return new Intl.DateTimeFormat(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date);
+        } catch (_) {
+            return 'N/A';
+        }
+    };
 
     useEffect(() => {
         // Get user data from localStorage
@@ -100,19 +119,19 @@ const Home = ({ onSignOut }) => {
                 <div className="quick-actions">
                     <h3>Quick Actions</h3>
                     <div className="actions-grid">
-                        <button className="action-btn">
-                            <span className="icon">💬</span>
-                            <span>Start Chat</span>
+                        <button className="action-btn" type="button" onClick={() => navigate('/complaint')}>
+                            <span className="icon">📝</span>
+                            <span>Make Complaint</span>
                         </button>
-                        <button className="action-btn">
+                        <button className="action-btn" type="button" onClick={() => navigate('/team')}>
                             <span className="icon">👥</span>
                             <span>View Team</span>
                         </button>
-                        <button className="action-btn">
+                        <button className="action-btn" type="button">
                             <span className="icon">📁</span>
                             <span>Files</span>
                         </button>
-                        <button className="action-btn">
+                        <button className="action-btn" type="button">
                             <span className="icon">⚙️</span>
                             <span>Settings</span>
                         </button>
@@ -125,15 +144,15 @@ const Home = ({ onSignOut }) => {
                         <div className="activity-item">
                             <span className="activity-icon">✅</span>
                             <div className="activity-content">
-                                <p>Successfully signed in</p>
-                                <small>Just now</small>
+                                <p>Last signed in</p>
+                                <small>{formatTimestamp(user.last_sign_in_at)}</small>
                             </div>
                         </div>
                         <div className="activity-item">
                             <span className="activity-icon">👤</span>
                             <div className="activity-content">
                                 <p>Account created</p>
-                                <small>{user.created_at}</small>
+                                <small>{formatTimestamp(user.created_at)}</small>
                             </div>
                         </div>
                     </div>
