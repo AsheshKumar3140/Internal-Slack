@@ -364,3 +364,119 @@
   color: var(--info-text);
   border: 1px solid var(--info-border);
 }
+
+/* Status badges for complaints */
+.status-badge {
+  padding: 6px 10px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+.status-badge.open {
+  background: var(--info-bg);
+  color: var(--info-text);
+  border-color: var(--info-border);
+}
+.status-badge.in_progress {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffd43b;
+  border-color: rgba(255, 193, 7, 0.2);
+}
+.status-badge.resolved {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border-color: var(--success-border);
+}
+.status-badge.closed {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border-color: var(--error-border);
+}
+
+/* Complaint description */
+.complaint-description {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: var(--border-radius-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--input-border);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+/* Complaint list item layout */
+.complaint-item {
+  position: relative;
+}
+.complaint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.complaint-item .team-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.complaint-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: color var(--transition-normal);
+}
+.complaint-item.is-open .complaint-meta {
+  color: var(--text-secondary);
+}
+
+/* Smaller top-right status badge */
+.status-badge.small {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+/* Stack complaint item vertically so meta is below title */
+.complaint-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Badge at top-right */
+.complaint-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+/* Priority badges */
+.priority-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+.priority-badge.urgent {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border-color: var(--error-border);
+}
+.priority-badge.high {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffd43b;
+  border-color: rgba(255, 193, 7, 0.2);
+}
+.priority-badge.medium {
+  background: var(--info-bg);
+  color: var(--info-text);
+  border-color: var(--info-border);
+}
+.priority-badge.low {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-tertiary);
+  border-color: var(--card-border);
+}

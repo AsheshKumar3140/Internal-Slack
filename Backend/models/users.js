@@ -8,6 +8,7 @@ const createUsersTable = `
         name VARCHAR(255) NOT NULL,
         role_id UUID REFERENCES roles(id),
         is_active BOOLEAN DEFAULT true,
+        preferences JSONB NOT NULL DEFAULT '{}'::jsonb,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );

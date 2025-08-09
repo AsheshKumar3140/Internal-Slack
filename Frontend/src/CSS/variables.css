@@ -86,3 +86,59 @@
   --z-popover: 1060;
   --z-tooltip: 1070;
 }
+
+/* Light Theme Overrides (even softer) */
+:root[data-theme="light"] {
+  /* Backgrounds */
+  --bg-primary: #dde2e8; /* dimmer off-white */
+  --bg-secondary: rgba(255, 255, 255, 0.82);
+  --bg-tertiary: rgba(255, 255, 255, 0.80);
+  --bg-quaternary: #eef1f5;
+
+  /* Cards */
+  --card-bg: rgba(255, 255, 255, 0.86);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-shadow: rgba(0, 0, 0, 0.08);
+
+  /* Inputs */
+  --input-bg: rgba(255, 255, 255, 0.92);
+  --input-border: rgba(0, 0, 0, 0.10);
+  --input-focus-bg: #ffffff;
+  --input-focus-border: rgba(0, 0, 0, 0.16);
+  --input-focus-shadow: rgba(0, 0, 0, 0.035);
+  --input-placeholder: rgba(0, 0, 0, 0.38);
+
+  /* Buttons */
+  --btn-primary-bg: rgba(0, 0, 0, 0.05);
+  --btn-primary-border: rgba(0, 0, 0, 0.08);
+  --btn-primary-hover-bg: rgba(0, 0, 0, 0.10);
+  --btn-primary-hover-border: rgba(0, 0, 0, 0.10);
+  --btn-disabled-opacity: 0.45;
+
+  /* Text */
+  --text-primary: #262a2f;
+  --text-secondary: rgba(0, 0, 0, 0.72);
+  --text-tertiary: rgba(0, 0, 0, 0.55);
+  --text-muted: rgba(0, 0, 0, 0.38);
+
+  /* Status (more muted) */
+  --error-bg: rgba(220, 53, 69, 0.06);
+  --error-border: rgba(220, 53, 69, 0.14);
+  --error-text: #8f1f1f;
+
+  --success-bg: rgba(40, 167, 69, 0.06);
+  --success-border: rgba(40, 167, 69, 0.14);
+  --success-text: #256b2d;
+
+  --warning-bg: rgba(255, 193, 7, 0.06);
+  --warning-border: rgba(255, 193, 7, 0.14);
+  --warning-text: #8a6400;
+
+  --info-bg: rgba(13, 202, 240, 0.06);
+  --info-border: rgba(13, 202, 240, 0.14);
+  --info-text: #165c88;
+
+  /* Links */
+  --link-color: #0a4f5a;
+  --link-hover-color: #083f48;
+}

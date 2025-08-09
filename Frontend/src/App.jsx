@@ -4,6 +4,8 @@ import Auth from './components/Auth';
 import Home from './components/Home';
 import Complaint from './components/Complaint';
 import Team from './components/Team';
+import MyComplaints from './components/MyComplaints';
+import Settings from './components/Settings';
 import './App.css';
 
 function App() {
@@ -66,6 +68,18 @@ function App() {
           path="/team" 
           element={
             isAuthenticated ? <Team /> : <Navigate to="/" replace />
+          } 
+        />
+        <Route 
+          path="/my-complaints" 
+          element={
+            isAuthenticated ? <MyComplaints /> : <Navigate to="/" replace />
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            isAuthenticated ? <Settings /> : <Navigate to="/" replace />
           } 
         />
         <Route path="*" element={<Navigate to="/" replace />} />

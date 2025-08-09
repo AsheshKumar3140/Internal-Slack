@@ -127,11 +127,11 @@ const Home = ({ onSignOut }) => {
                             <span className="icon">👥</span>
                             <span>View Team</span>
                         </button>
-                        <button className="action-btn" type="button">
+                        <button className="action-btn" type="button" onClick={() => navigate('/my-complaints')}>
                             <span className="icon">📁</span>
-                            <span>Files</span>
+                            <span>My Complaints</span>
                         </button>
-                        <button className="action-btn" type="button">
+                        <button className="action-btn" type="button" onClick={() => navigate('/settings')}>
                             <span className="icon">⚙️</span>
                             <span>Settings</span>
                         </button>

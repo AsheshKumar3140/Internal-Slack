@@ -5,6 +5,7 @@ import { connectToDatabase } from "./config/supabase.js";
 import authRoutes from "./routes/authRoutes.js";
 import complaintRoutes from "./routes/complaintRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
 
 dotenv.config({ path: "../.env" });
 
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World");

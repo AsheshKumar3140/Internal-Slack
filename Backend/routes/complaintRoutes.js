@@ -46,6 +46,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+// List complaints created by the authenticated user
+router.get('/mine', authenticateToken, async (req, res) => {
+  try {
+    await ensureTablesExist();
+    const me = req.user?.id;
+    if (!me) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { data, error } = await supabase
+      .from('complaints')
+      .select('*')
+      .eq('user_id', me)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.json({ complaints: data || [] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Create complaint with optional files - requires auth
 router.post('/', authenticateToken, upload.array('attachments', 5), async (req, res) => {
   try {
